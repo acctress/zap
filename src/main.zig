@@ -10,13 +10,19 @@ pub fn main() !void {
     defer arena.deinit();
     const allocator = arena.allocator();
 
-    const source =
-        \\%0 = loadk 42
-        \\%1 = loadk 84
-        \\%3 = add %0, %1
-        \\print %3
-        \\halt
-    ;
+    const args = try std.process.argsAlloc(allocator);
+
+    if (args.len > 2) {
+        std.debug.print("too many args, expected one.\n", .{});
+        std.process.exit(1);
+    }
+
+    const source_path = args[1];
+    var source_file = try std.fs.cwd().openFile(source_path, .{ .mode = .read_only });
+    defer source_file.close();
+
+    const source: []u8 = try source_file.readToEndAlloc(allocator, std.math.maxInt(usize));
+    defer allocator.free(source);
 
     var parser = try Parser.init(allocator, source);
     const ast = try parser.parse();
@@ -36,6 +42,4 @@ pub fn main() !void {
 
     var vm = try vmcore.VM.init(allocator, bytecode);
     _ = try vm.run();
-
-    // std.debug.print("{d}\n", .{result});
 }

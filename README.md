@@ -1,6 +1,11 @@
 # zap
 A lightweight register-based virtual machine written in Zig. Simple SSA parsing, compiling down to 64 bit bytecode, virtual machine houses 256 general purpose registers.
 
+# Usage
+```
+$ zap file.ssa
+```
+
 * ⚠️ Zig 0.15.2 required.
 
 # Features
