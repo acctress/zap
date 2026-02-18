@@ -18,6 +18,14 @@ pub const Token = union(enum) {
     eof,
 };
 
+const keywords = std.StaticStringMap(Token).initComptime(.{
+    .{ "loadk", .op_loadk },
+    .{ "add", .op_add },
+    .{ "sub", .op_sub },
+    .{ "print", .op_print },
+    .{ "halt", .op_halt },
+});
+
 pub const Lexer = struct {
     source: []const u8,
     pos: usize,
@@ -78,25 +86,8 @@ pub const Lexer = struct {
                         self.pos += 1;
                     }
 
-                    if (std.mem.eql(u8, self.source[start..self.pos], "loadk")) {
-                        return .op_loadk;
-                    }
-
-                    if (std.mem.eql(u8, self.source[start..self.pos], "add")) {
-                        return .op_add;
-                    }
-
-                    if (std.mem.eql(u8, self.source[start..self.pos], "sub")) {
-                        return .op_sub;
-                    }
-
-                    if (std.mem.eql(u8, self.source[start..self.pos], "print")) {
-                        return .op_print;
-                    }
-
-                    if (std.mem.eql(u8, self.source[start..self.pos], "halt")) {
-                        return .op_halt;
-                    }
+                    const sym = self.source[start..self.pos];
+                    return keywords.get(sym) orelse .{ .identifier = sym };
                 }
 
                 self.pos += 1;
